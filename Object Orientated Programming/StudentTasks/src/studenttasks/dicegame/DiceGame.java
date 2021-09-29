@@ -84,18 +84,19 @@ public class DiceGame extends studenttasks.Task {
     public void run()
     {
         int input = 0;
-        while(input<1 || input > 2)
+        while(input<1 || input > 3)
         {
             System.out.println("Choose a game to play:\n"
                              + "Game 1 (Best of 5)\n"
-                             + "Game 2 (First to matching dice)\n\n");
+                             + "Game 2 (First to matching dice)\n"
+                             + "Game 3 (First to matching dice in GUI)\n\n");
 
-            System.out.print("Please enter your selection (1 or 2): ");
+            System.out.print("Please enter your selection (1-3): ");
             try{
                 input = scan.nextInt();
             }catch(Exception e){scan.nextLine();}
             
-            if(input <1 || input > 2)
+            if(input <1 || input > 3)
             {
                 System.out.println("Invalid Input!!!\n\n\n");
             }
@@ -103,10 +104,15 @@ public class DiceGame extends studenttasks.Task {
         scan.nextLine();
         if(input == 1)
             System.out.println(playGame1());
-        else
+        else if (input == 2)
             System.out.println(playGame2());
-        
-        scan.close();
+        else
+        {
+            DiceGameWindow.runDiceGameWindow();
+            System.out.println("Please go and play the game in the newly opened window then return and press enter to continue...\n");
+            scan.nextLine();
+        }
+            scan.close();
     }
           
 }
