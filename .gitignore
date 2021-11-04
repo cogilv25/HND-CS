@@ -2,3 +2,6 @@
 **/private
 *private.*
 *.class
+Desktop/*
+Virtual Machines/*
+*.BIN/*
