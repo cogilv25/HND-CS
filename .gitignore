@@ -4,5 +4,7 @@
 *.class
 Desktop/*
 Virtual Machines/*
+Screenshots/*
+BackTest/*
 *.BIN/*
 System Volume Information
