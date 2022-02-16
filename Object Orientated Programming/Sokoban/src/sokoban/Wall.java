@@ -1,10 +1,10 @@
 /*======================================================
-* file: Wall.java
+* file: Crate.java
 * Author: Calum Lindsay
 * Created: 06-10/2021
-* Last Modified: 06-10/2021
-* Notes: This is a MapElement that prevents the Player
-* from moving onto the same tile as it.
+* Last Modified: 12-01/2022
+* Notes: This is a simple class that represents
+* a Wall on the map in the game. 
 ========================================================*/
 package sokoban;
 

@@ -6,9 +6,11 @@
 * Notes: This is a simple class to store information 
 * about a single tile on the map.
 ========================================================*/
+
 package sokoban;
 
 class MapElement {
+    // Variables
     private boolean canBePushed;
     private String imgFileName;
     private boolean isDestination;
@@ -18,11 +20,7 @@ class MapElement {
     private int x;
     private int y;
     
-    public MapElement()
-    {
-        underneath = this;
-    }
-    
+    //Functions
     public boolean getCanBePushed()
     {
         return canBePushed;

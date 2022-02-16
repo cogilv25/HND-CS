@@ -1,14 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/*======================================================
+* file: Crate.java
+* Author: Calum Lindsay
+* Created: 06-10/2021
+* Last Modified: 12-01/2022
+* Notes: This is a simple class that represents
+* a Crate on the map in the game. 
+========================================================*/
+
 package sokoban;
 
-/**
- *
- * @author Calum
- */
 public class Crate extends MapElement {
 
     public Crate() 

@@ -2,10 +2,10 @@
 * file: Map.java
 * Author: Calum Lindsay
 * Created: 06-10/2021
-* Last Modified: 06-10/2021
-* Notes: This class stores the map as an array of Map 
-* Elements and allows the map to be viewed abstractly
-* and queried about it's current state without
+* Last Modified: 09-02/2022
+* Notes: This class loads and stores the map as an
+* array of Map Elements and allows the map to be
+* viewed and queried about it's current state without
 * understanding the underlying implementation.
 ========================================================*/
 package sokoban;
@@ -14,9 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Vector;
 
 class Map {
     private MapElement myMap[][];
@@ -85,16 +82,16 @@ class Map {
     public void move(int currX, int currY, int newX, int newY)
     {
         //Put element to move in limbo
-        MapElement limbo = myMap[currY][currX];
+        MapElement swap = myMap[currY][currX];
         //Replace element to move with what
         //was underneath it 
-        myMap[currY][currX] = limbo.getUnderneath();
+        myMap[currY][currX] = swap.getUnderneath();
         //Put the tile at the new location underneath
         //the tile we are moving
-        limbo.setUnderneath(myMap[newY][newX]);
+        swap.setUnderneath(myMap[newY][newX]);
         //Finally move the tile in limbo to it's
         //new position
-        myMap[newY][newX] = limbo;
+        myMap[newY][newX] = swap;
     }
     
     public void movePlayer(int dir)
@@ -151,7 +148,7 @@ class Map {
         InputStream stream = getClass().getResourceAsStream(mapName);
         if(stream == null)
         {
-            System.out.println("Error: unable to load map!");
+            System.out.println("Error: unable to load map file!");
             return;
         }
         InputStreamReader reader = new InputStreamReader(stream);
@@ -188,12 +185,10 @@ class Map {
         {
             e.printStackTrace();
         }
-        System.out.println("Length = " + length +" Breadth = " + breadth);
         //Create myMap and populate it with
         //the MapElements defined by str.
         myMap = new MapElement[length][breadth];
         int y=0,x=0;
-        System.out.println("Length: " + str.length());
         for(int i = 0;i<str.length();i++)
         {
             switch((char)str.charAt(i))
@@ -230,6 +225,7 @@ class Map {
                 break;
             }
         }
+        //Fill any empty space with Floor tiles.
         if(x!=breadth)
         {
             for(int j = x;j<breadth;j++)

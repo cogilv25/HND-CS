@@ -2,7 +2,7 @@
 * file: Game.java
 * Author: Calum Lindsay
 * Created: 06-10/2021
-* Last Modified: 13-10/2021
+* Last Modified: 16-02/2022
 * Notes: This is the main Game class for my sokoban
 * implementation. The entry point for the program and 
 * the game logic are contained in this class.
@@ -79,8 +79,8 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         //Initialise Game state
         level = 0;
         
-        mapNames = new String[2];
-        for(int i=0;i<2;i++)
+        mapNames = new String[3];
+        for(int i=0;i<3;i++)
         {
             mapNames[i] = "Map" + i + ".map";
         }
@@ -90,9 +90,8 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         //Resize window and components appropriately
         int length = tmpMap.getLength(), breadth = tmpMap.getBreadth();
         myElements = new JLabel[length][breadth];
-        centrePanel.setPreferredSize(new java.awt.Dimension(breadth*33, length*35));
-        southPanel.setPreferredSize(new java.awt.Dimension(breadth*34, 20));
-        this.setPreferredSize(new java.awt.Dimension(breadth*33,length*34+35));
+        southPanel.setPreferredSize(new java.awt.Dimension(3160, 20));
+        this.setPreferredSize(new java.awt.Dimension(breadth*32+20,length*33+50));
         centrePanel.setLayout(new java.awt.GridLayout(length, breadth));
         pack();
         
@@ -208,39 +207,35 @@ public class Game extends javax.swing.JFrame implements KeyListener {
                 case KeyEvent.VK_W, KeyEvent.VK_UP:
                     lbl_moves.setText("Pressed Up");
                     tmpMap.movePlayer(1);
-                    drawMap();
                     break;
                 case KeyEvent.VK_S, KeyEvent.VK_DOWN:
                     lbl_moves.setText("Pressed Down");
                     tmpMap.movePlayer(3);
-                    drawMap();
                     break;
                 case KeyEvent.VK_A, KeyEvent.VK_LEFT:
                     lbl_moves.setText("Pressed Left");
                     tmpMap.movePlayer(4);
-                    drawMap();
                     break;
                 case KeyEvent.VK_D, KeyEvent.VK_RIGHT:
                     lbl_moves.setText("Pressed Right");
                     tmpMap.movePlayer(2);
-                    drawMap();
                     break;
             }
             if((complete = tmpMap.checkForWin()))
             {
-                if(level < 1)
+                if(level < 2)
                 {
-                   lbl_moves.setText("Well done! Completed in " + tmpMap.getNumMoves() + " moves! Press enter to continue...");
+                   lbl_moves.setText("Well done! Completed in " + tmpMap.getNumMoves() + " moves! Press enter to continue or r to retry...");
                 }
                 else
                 {
-                   lbl_moves.setText("Well done! Completed in " + tmpMap.getNumMoves() + " moves! There are no more levels left!!!");
+                   lbl_moves.setText("Well done! Completed in " + tmpMap.getNumMoves() + " moves! Press r to retry, there are no more levels left!!!");
                 }
             }
         }
         else if(e.getKeyCode()== KeyEvent.VK_ENTER)
         {
-            if(level == 1)
+            if(level == 2)
             {
                 return;
             }
@@ -251,12 +246,10 @@ public class Game extends javax.swing.JFrame implements KeyListener {
             tmpMap.loadMap(mapNames[level]);
             tmpMap.findPlayer();
 
-            //Reset and resize window and components appropriately
+            //Reset and resize window and components as needed
             int length = tmpMap.getLength(), breadth = tmpMap.getBreadth();
             myElements = new JLabel[length][breadth];
-            centrePanel.setPreferredSize(new java.awt.Dimension(breadth*33, length*35));
-            southPanel.setPreferredSize(new java.awt.Dimension(breadth*34, 20));
-            this.setPreferredSize(new java.awt.Dimension(breadth*33,length*34+35));
+            this.setPreferredSize(new java.awt.Dimension(breadth*32+20,length*33+50));
             centrePanel.setLayout(new java.awt.GridLayout(length, breadth));
             pack();
         
@@ -270,9 +263,18 @@ public class Game extends javax.swing.JFrame implements KeyListener {
                     centrePanel.add(myElements[i][j]);
                 }
             }
-            
-            //Perform first draw
-            drawMap();
+        }
+        if(e.getKeyCode() == KeyEvent.VK_R)
+        {
+            //Reload and reset the map
+            complete = false;
+            tmpMap.resetNoMoves();
+            tmpMap.loadMap(mapNames[level]);
+            tmpMap.findPlayer();
+        }
+        if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+        {
+            this.dispose();
         }
         
         drawMap();
