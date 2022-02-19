@@ -1,6 +1,8 @@
 **/build
 **/private
 *private.*
+**.properties
+**-impl.xml
 *.class
 Desktop/*
 Virtual Machines/*
