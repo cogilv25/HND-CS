@@ -7,6 +7,16 @@
 * implementation. The entry point for the program and 
 * the game logic are contained in this class.
 ========================================================*/
+
+
+/*
+* Control Scheme:
+* WASD/Arrow keys: move character
+* R: reset the current level
+* Enter: move to next level if level is complete
+* Escape: exit the game
+*/
+
 package sokoban;
 
 import java.awt.event.KeyEvent;
@@ -67,6 +77,7 @@ public class Game extends javax.swing.JFrame implements KeyListener {
     public Game() {
         this.tmpMap = new Map();
         imageHashMap = new HashMap<String, ImageIcon>();
+        this.setResizable(false);
         //Initialise JFrame
         initComponents();
         //Initialise KeyListener
@@ -79,8 +90,8 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         //Initialise Game state
         level = 0;
         
-        mapNames = new String[3];
-        for(int i=0;i<3;i++)
+        mapNames = new String[7];
+        for(int i=0;i<mapNames.length;i++)
         {
             mapNames[i] = "Map" + i + ".map";
         }
@@ -123,12 +134,11 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         centrePanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(415, 400));
 
         southPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         southPanel.setPreferredSize(new java.awt.Dimension(400, 15));
 
-        lbl_moves.setText("Player Moves Will Be Displayed Here");
+        lbl_moves.setText("Controls: R - Reset Map, Enter - Next Map, WASD/Arrows - Movement");
 
         javax.swing.GroupLayout southPanelLayout = new javax.swing.GroupLayout(southPanel);
         southPanel.setLayout(southPanelLayout);
@@ -223,19 +233,19 @@ public class Game extends javax.swing.JFrame implements KeyListener {
             }
             if((complete = tmpMap.checkForWin()))
             {
-                if(level < 2)
+                if(level < mapNames.length-1)
                 {
-                   lbl_moves.setText("Well done! Completed in " + tmpMap.getNumMoves() + " moves! Press enter to continue or r to retry...");
+                   lbl_moves.setText("Completed in " + tmpMap.getNumMoves() + " moves!");
                 }
                 else
                 {
-                   lbl_moves.setText("Well done! Completed in " + tmpMap.getNumMoves() + " moves! Press r to retry, there are no more levels left!!!");
+                   lbl_moves.setText("Completed in " + tmpMap.getNumMoves() + " moves! Game over!!!");
                 }
             }
         }
         else if(e.getKeyCode()== KeyEvent.VK_ENTER)
         {
-            if(level == 2)
+            if(level == mapNames.length - 1)
             {
                 return;
             }
@@ -263,6 +273,8 @@ public class Game extends javax.swing.JFrame implements KeyListener {
                     centrePanel.add(myElements[i][j]);
                 }
             }
+            
+            lbl_moves.setText("Level " + (level+1) + "/" + mapNames.length);
         }
         if(e.getKeyCode() == KeyEvent.VK_R)
         {

@@ -167,7 +167,7 @@ class Map {
                 if(c=='\n')
                 {
                     ++length;
-                    breadth = Math.max(breadth,x);
+                    breadth = Math.max(breadth,x-1);
                     x = 0;
                 }
                 else
@@ -185,6 +185,7 @@ class Map {
         {
             e.printStackTrace();
         }
+        
         //Create myMap and populate it with
         //the MapElements defined by str.
         myMap = new MapElement[length][breadth];
