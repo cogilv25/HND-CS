@@ -1,0 +1,35 @@
+.logocontainer img.img-hover, .logocontainer:hover img.img-default
+{
+	display: none;
+}
+
+.logocontainer:hover img.img-hover
+{
+	display: block;
+}
+
+.links, .links:visited, .activelink:visited
+{
+  color: #606060;
+}
+
+.activelink
+{
+  color: #A0A0A0;
+  text-decoration-line: underline;
+}
+
+.links:active, .activelink:active
+{
+  color: #C0C0C0;
+}
+
+.links:hover, .activelink:hover
+{
+  color: #808080;
+}
+
+.normalstuff
+{
+  color: #808080;
+}
