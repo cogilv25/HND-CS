@@ -7,10 +7,10 @@
 	<div class="row justify-content-center">
 		<div class="col-md-3"></div>
 		<div class="col-12 col-md-6">
-			<form class="row g-3 needs-validation" novalidate action="register.php" method="post">
+			<form class="row g-3 needs-validation" novalidate action="<?php echo basename($_SERVER['PHP_SELF']);?>" method="post">
 				<div class="col-md-6">
 					<label for="validationCustom01" class="form-label">Username</label>
-					<input type="text" class="form-control" name="email" id="validationCustom01" required>
+					<input type="text" class="form-control" name="username" id="validationCustom01" required>
 					<div class="valid-feedback">
 						Looks good!
 					</div>
@@ -34,10 +34,10 @@
 					<div class="form-check">
 						<input class="form-check-input" type="checkbox" id="invalidCheck" required>
 						<label class="form-check-label normalstuff" for="invalidCheck">
-							Agree to terms and conditions
+							Are you over 18?
 						</label>
 						<div class="invalid-feedback">
-							You must agree before submitting.
+							You must be over 18 to register.
 						</div>
 					</div>
 				</div>
