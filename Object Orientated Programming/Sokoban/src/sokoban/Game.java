@@ -2,7 +2,7 @@
 * file: Game.java
 * Author: Calum Lindsay
 * Created: 06-10/2021
-* Last Modified: 16-02/2022
+* Last Modified: 26-04/2022
 * Notes: This is the main Game class for my sokoban
 * implementation. The entry point for the program and 
 * the game logic are contained in this class.
@@ -30,11 +30,9 @@ import javax.swing.JLabel;
 public class Game extends javax.swing.JFrame implements KeyListener {
 
     private boolean complete;
-    private int dir;
     private int level;
     private String mapNames[];
     private HashMap<String,ImageIcon> imageHashMap;
-    private Coord playerLoc;
     private JLabel myElements[][];
     private Map tmpMap;
     
@@ -96,8 +94,6 @@ public class Game extends javax.swing.JFrame implements KeyListener {
     
     //Game Constructor
     public Game() {
-        this.tmpMap = new Map();
-        imageHashMap = new HashMap<String, ImageIcon>();
         this.setResizable(false);
         //Initialise JFrame
         initComponents();
@@ -110,24 +106,32 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         
         //Initialise Game state
         level = 0;
+        this.tmpMap = new Map();
+        imageHashMap = new HashMap<String, ImageIcon>();
         
-        mapNames = new String[8];
+        mapNames = new String[7];
         for(int i=0;i<mapNames.length;i++)
         {
             mapNames[i] = "Map" + i + ".map";
         }
         
+        //If we are unable to load the map display a
+        // message and the game is over.
         if(!tmpMap.loadMap(mapNames[level]))
         {
-            lbl_moves.setText("Error: unable to load map file!");
+            lbl_moves.setText("Error: unable to load map file! | Game Over!!!");
             complete = true;
         }
         else
         {
+            //If we are unable to find the player display a
+            // message and the game is over.
+            if(tmpMap.findPlayer() == null)
+            {
+                lbl_moves.setText("Error: map doesn't contain a player | Game Over!!!");
+                complete = true;
+            }
             refreshWindowLayout();
-
-            tmpMap.findPlayer();
-
             drawMap();
         }
     }
@@ -146,11 +150,12 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         centrePanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new java.awt.BorderLayout());
 
         southPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         southPanel.setPreferredSize(new java.awt.Dimension(400, 15));
 
-        lbl_moves.setText("Controls: R - Reset Map, Enter - Next Map, WASD/Arrows - Movement");
+        lbl_moves.setText("R: Retry | Enter: Next Map (If complete) | WASD/Arrows: Movement");
 
         javax.swing.GroupLayout southPanelLayout = new javax.swing.GroupLayout(southPanel);
         southPanel.setLayout(southPanelLayout);
@@ -226,27 +231,19 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         {
             if(!tmpMap.checkForWin())
             {
+                //Player movement
                 switch(e.getKeyCode())
                 {
-                    case KeyEvent.VK_W, KeyEvent.VK_UP:
-                        lbl_moves.setText("Pressed Up");
-                        tmpMap.movePlayer(1);
-                        break;
-                    case KeyEvent.VK_S, KeyEvent.VK_DOWN:
-                        lbl_moves.setText("Pressed Down");
-                        tmpMap.movePlayer(3);
-                        break;
-                    case KeyEvent.VK_A, KeyEvent.VK_LEFT:
-                        lbl_moves.setText("Pressed Left");
-                        tmpMap.movePlayer(4);
-                        break;
-                    case KeyEvent.VK_D, KeyEvent.VK_RIGHT:
-                        lbl_moves.setText("Pressed Right");
-                        tmpMap.movePlayer(2);
-                        break;
+                    case KeyEvent.VK_W, KeyEvent.VK_UP -> tmpMap.movePlayer(1);
+                    case KeyEvent.VK_S, KeyEvent.VK_DOWN -> tmpMap.movePlayer(3);
+                    case KeyEvent.VK_A, KeyEvent.VK_LEFT -> tmpMap.movePlayer(4);
+                    case KeyEvent.VK_D, KeyEvent.VK_RIGHT -> tmpMap.movePlayer(2);
                 }
+                //If player movement has caused the level
+                // to now be complete display a congratulatory message
                 if(tmpMap.checkForWin())
                 {
+                    //If the level is the last level then the game is over
                     if(level == mapNames.length-1)
                     {
                         complete = true;
@@ -258,39 +255,62 @@ public class Game extends javax.swing.JFrame implements KeyListener {
                     }
                 }
             }
+            //If enter is pressed, the game isn't over and
+            // the level is complete then load the next map 
             else if (e.getKeyCode()== KeyEvent.VK_ENTER)
             {
-                //Load next map
                 ++level;
                 tmpMap.resetNoMoves();
+                //If we are unable to load the map display a
+                // message and the game is over.
                  if(!tmpMap.loadMap(mapNames[level]))
                 {
-                    lbl_moves.setText("Error: unable to load map file!");
+                    lbl_moves.setText("Error: unable to load map file! | Game Over!!!");
                     complete = true;
                 }
                 else
                 {
-                    tmpMap.findPlayer();
-                    refreshWindowLayout();
-                    lbl_moves.setText("Level " + (level+1) + "/" + mapNames.length);
+                    //If we are unable to find the player display a
+                    // message and the game is over.
+                   if(tmpMap.findPlayer() == null)
+                    {
+                        lbl_moves.setText("Error: unable to load map file! | Game Over!!!");
+                        complete = true;
+                    }
+                   else
+                   {
+                       refreshWindowLayout();
+                       lbl_moves.setText("Level " + (level+1) + "/" + mapNames.length);
+                   }
                 }
             }   
         }
+        //Attempt to reload and reset the current
+        // level/map if R is pressed
         if(e.getKeyCode() == KeyEvent.VK_R)
         {
-            //Reload and reset the map
             complete = false;
             tmpMap.resetNoMoves();
+            
+            //If we are unable to load the map display a
+            // message and the game is over.
             if(!tmpMap.loadMap(mapNames[level]))
             {
-                lbl_moves.setText("Error: unable to load map file!");
+                lbl_moves.setText("Error: unable to load map file! | Game Over!!!");
                 complete = true;
             }
             else
             {
-                tmpMap.findPlayer();
+                //If we are unable to find the player display a
+                // message and the game is over.
+                if(tmpMap.findPlayer() == null)
+                {
+                    lbl_moves.setText("Error: unable to load map file! | Game Over!!!");
+                    complete = true;
+                }
             }
         }
+        //Close the game if escape is pressed
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
         {
             this.dispose();
