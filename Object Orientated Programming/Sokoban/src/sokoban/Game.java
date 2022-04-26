@@ -63,12 +63,33 @@ public class Game extends javax.swing.JFrame implements KeyListener {
     
     public void drawMap()
     {
-        MapElement map[][] = tmpMap.getMap();
         for(int i = 0; i<tmpMap.getLength();i++)
         {
             for(int j=0;j<tmpMap.getBreadth();j++)
             {
-                myElements[i][j].setIcon(getImage(map[i][j].getImgFilename()));
+                myElements[i][j].setIcon(getImage(tmpMap.getElement(j,i).getImgFilename()));
+            }
+        }
+    }
+    
+    public void refreshWindowLayout()
+    {
+        //Reset and resize window and components as needed
+        int length = tmpMap.getLength(), breadth = tmpMap.getBreadth();
+        myElements = new JLabel[length][breadth];
+        southPanel.setPreferredSize(new java.awt.Dimension(breadth*32+20, 20));
+        this.setPreferredSize(new java.awt.Dimension(breadth*32+20,length*33+50));
+        centrePanel.setLayout(new java.awt.GridLayout(length, breadth));
+        pack();
+        
+        //Resize GridLayout
+        centrePanel.removeAll();
+        for(int i=0;i<length;i++)
+        {
+            for(int j=0;j<breadth;j++)
+            {
+                myElements[i][j] = new JLabel();
+                centrePanel.add(myElements[i][j]);
             }
         }
     }
@@ -90,34 +111,25 @@ public class Game extends javax.swing.JFrame implements KeyListener {
         //Initialise Game state
         level = 0;
         
-        mapNames = new String[7];
+        mapNames = new String[8];
         for(int i=0;i<mapNames.length;i++)
         {
             mapNames[i] = "Map" + i + ".map";
         }
         
-        tmpMap.loadMap(mapNames[level]);
-        
-        //Resize window and components appropriately
-        int length = tmpMap.getLength(), breadth = tmpMap.getBreadth();
-        myElements = new JLabel[length][breadth];
-        southPanel.setPreferredSize(new java.awt.Dimension(3160, 20));
-        this.setPreferredSize(new java.awt.Dimension(breadth*32+20,length*33+50));
-        centrePanel.setLayout(new java.awt.GridLayout(length, breadth));
-        pack();
-        
-        for(int i=0;i<length;i++)
+        if(!tmpMap.loadMap(mapNames[level]))
         {
-            for(int j=0;j<breadth;j++)
-            {
-                myElements[i][j] = new JLabel();
-                centrePanel.add(myElements[i][j]);
-            }
+            lbl_moves.setText("Error: unable to load map file!");
+            complete = true;
         }
-        
-        tmpMap.findPlayer();
-        
-        drawMap();
+        else
+        {
+            refreshWindowLayout();
+
+            tmpMap.findPlayer();
+
+            drawMap();
+        }
     }
 
     /**
@@ -212,77 +224,72 @@ public class Game extends javax.swing.JFrame implements KeyListener {
     public void keyPressed(KeyEvent e) {
         if(!complete)
         {
-            switch(e.getKeyCode())
+            if(!tmpMap.checkForWin())
             {
-                case KeyEvent.VK_W, KeyEvent.VK_UP:
-                    lbl_moves.setText("Pressed Up");
-                    tmpMap.movePlayer(1);
-                    break;
-                case KeyEvent.VK_S, KeyEvent.VK_DOWN:
-                    lbl_moves.setText("Pressed Down");
-                    tmpMap.movePlayer(3);
-                    break;
-                case KeyEvent.VK_A, KeyEvent.VK_LEFT:
-                    lbl_moves.setText("Pressed Left");
-                    tmpMap.movePlayer(4);
-                    break;
-                case KeyEvent.VK_D, KeyEvent.VK_RIGHT:
-                    lbl_moves.setText("Pressed Right");
-                    tmpMap.movePlayer(2);
-                    break;
-            }
-            if((complete = tmpMap.checkForWin()))
-            {
-                if(level < mapNames.length-1)
+                switch(e.getKeyCode())
                 {
-                   lbl_moves.setText("Completed in " + tmpMap.getNumMoves() + " moves!");
+                    case KeyEvent.VK_W, KeyEvent.VK_UP:
+                        lbl_moves.setText("Pressed Up");
+                        tmpMap.movePlayer(1);
+                        break;
+                    case KeyEvent.VK_S, KeyEvent.VK_DOWN:
+                        lbl_moves.setText("Pressed Down");
+                        tmpMap.movePlayer(3);
+                        break;
+                    case KeyEvent.VK_A, KeyEvent.VK_LEFT:
+                        lbl_moves.setText("Pressed Left");
+                        tmpMap.movePlayer(4);
+                        break;
+                    case KeyEvent.VK_D, KeyEvent.VK_RIGHT:
+                        lbl_moves.setText("Pressed Right");
+                        tmpMap.movePlayer(2);
+                        break;
+                }
+                if(tmpMap.checkForWin())
+                {
+                    if(level == mapNames.length-1)
+                    {
+                        complete = true;
+                        lbl_moves.setText("Completed in " + tmpMap.getNumMoves() + " moves! | Game Over!!!");
+                    }
+                    else
+                    {
+                        lbl_moves.setText("Completed in " + tmpMap.getNumMoves() + " moves!");
+                    }
+                }
+            }
+            else if (e.getKeyCode()== KeyEvent.VK_ENTER)
+            {
+                //Load next map
+                ++level;
+                tmpMap.resetNoMoves();
+                 if(!tmpMap.loadMap(mapNames[level]))
+                {
+                    lbl_moves.setText("Error: unable to load map file!");
+                    complete = true;
                 }
                 else
                 {
-                   lbl_moves.setText("Completed in " + tmpMap.getNumMoves() + " moves! Game over!!!");
+                    tmpMap.findPlayer();
+                    refreshWindowLayout();
+                    lbl_moves.setText("Level " + (level+1) + "/" + mapNames.length);
                 }
-            }
-        }
-        else if(e.getKeyCode()== KeyEvent.VK_ENTER)
-        {
-            if(level == mapNames.length - 1)
-            {
-                return;
-            }
-            //Load next map
-            ++level;
-            complete = false;
-            tmpMap.resetNoMoves();
-            tmpMap.loadMap(mapNames[level]);
-            tmpMap.findPlayer();
-
-            //Reset and resize window and components as needed
-            int length = tmpMap.getLength(), breadth = tmpMap.getBreadth();
-            myElements = new JLabel[length][breadth];
-            this.setPreferredSize(new java.awt.Dimension(breadth*32+20,length*33+50));
-            centrePanel.setLayout(new java.awt.GridLayout(length, breadth));
-            pack();
-        
-            //Resize GridLayout
-            centrePanel.removeAll();
-            for(int i=0;i<length;i++)
-            {
-                for(int j=0;j<breadth;j++)
-                {
-                    myElements[i][j] = new JLabel();
-                    centrePanel.add(myElements[i][j]);
-                }
-            }
-            
-            lbl_moves.setText("Level " + (level+1) + "/" + mapNames.length);
+            }   
         }
         if(e.getKeyCode() == KeyEvent.VK_R)
         {
             //Reload and reset the map
             complete = false;
             tmpMap.resetNoMoves();
-            tmpMap.loadMap(mapNames[level]);
-            tmpMap.findPlayer();
+            if(!tmpMap.loadMap(mapNames[level]))
+            {
+                lbl_moves.setText("Error: unable to load map file!");
+                complete = true;
+            }
+            else
+            {
+                tmpMap.findPlayer();
+            }
         }
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
         {

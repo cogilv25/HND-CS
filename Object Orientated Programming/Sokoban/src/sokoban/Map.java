@@ -1,12 +1,11 @@
 /*======================================================
 * file: Map.java
 * Author: Calum Lindsay
-* Created: 06-10/2021
-* Last Modified: 09-02/2022
+* Created: 06/10/2021
+* Last Modified: 23/04/2022
 * Notes: This class loads and stores the map as an
 * array of Map Elements and allows the map to be
-* viewed and queried about it's current state without
-* understanding the underlying implementation.
+* viewed and queried about it's current state.
 ========================================================*/
 package sokoban;
 
@@ -25,15 +24,22 @@ class Map {
     
     public Map()
     {
-        
+        length = 0;
+        breadth = 0;
+        playerLocation = new Coord();
+        complete = false;
+        noOfMoves = 0;
     }
     
     public boolean checkForWin()
     {
+        //If we have already determined the map is complete return true
+        if(complete)
+            return true;
+        
+        
         //If we find a Crate with anything other than a
         //diamond under it then the game isn't over.
-        //We will also lock any crate in place that is on
-        //a diamond and change it's image.
         boolean result = true;
         for(int y=0;y<length;y++)
         {
@@ -45,6 +51,8 @@ class Map {
                     {
                         if(myMap[y][x].getUnderneath().getSymbol().compareTo("D")==0)
                         {
+                            //We will also lock any crate in place that is on
+                            //a diamond and change it's image.
                             myMap[y][x].setIsDestination(true);
                             myMap[y][x].setCanBePushed(false);
                             myMap[y][x].setImgFilename("assets/MayBADes.png");
@@ -55,13 +63,9 @@ class Map {
                 }
             }
         }
-
-        return result;
-    }
-    
-    public void displayMap()
-    {
-        // ??????????????????????
+        
+        //Set complete and return the result
+        return (complete = result);
     }
     
     public Coord findPlayer()
@@ -70,7 +74,6 @@ class Map {
             for(int x = 0;x<breadth;x++)
                 if(myMap[y][x].getSymbol().compareTo("S")==0)
                 {
-                    playerLocation = new Coord();
                     playerLocation.setXCoord(x);
                     playerLocation.setYCoord(y);
                     return playerLocation;
@@ -81,7 +84,12 @@ class Map {
     
     public void move(int currX, int currY, int newX, int newY)
     {
-        //Put element to move in limbo
+        //Prevent the player pushing objects out of the playable
+        // area if there are no walls to stop them
+        if(newX < 0 || newY < 0 || newX >= breadth || newY >= length)
+            return;
+        
+        //Put element to move in swap
         MapElement swap = myMap[currY][currX];
         //Replace element to move with what
         //was underneath it 
@@ -105,7 +113,8 @@ class Map {
         int dirX = ((dir-1)%2)*(-(dir-1)+2);
         
         
-        //Prevent player moving off the map
+        //Prevent the player moving out of the playable
+        // area if there are no walls to stop them
         if(x+dirX < 0 || y+dirY < 0 || x+dirX >= breadth || y+dirY >= length)
             return;
         
@@ -120,15 +129,16 @@ class Map {
             if(myMap[y+2*dirY][x+2*dirX].getObs())
                 return;
             //Otherwise move the obstacle one tile
-            //in the direction the player is facing
+            //in the direction the player is moving
             move(x+dirX,y+dirY,x+2*dirX,y+2*dirY);
         }
         
-        //Finally move the player one tile
+        //Move the player one tile
         move(x,y,x+dirX,y+dirY);
-  
         playerLocation.setXCoord(x+dirX);
         playerLocation.setYCoord(y+dirY);
+        
+        //Increment number of moves 
         noOfMoves++;
     }
     
@@ -142,15 +152,15 @@ class Map {
         return myMap[y][x].getCanBePushed();
     }
     
-    public void loadMap(String mapName)
+    public boolean loadMap(String mapName)
     {
         //Open the file containing the map
         InputStream stream = getClass().getResourceAsStream(mapName);
+        
+        //Most likely the file path is wrong if stream is null 
         if(stream == null)
-        {
-            System.out.println("Error: unable to load map file!");
-            return;
-        }
+            return false;
+        
         InputStreamReader reader = new InputStreamReader(stream);
         BufferedReader buffer = new BufferedReader(reader);
         
@@ -181,13 +191,15 @@ class Map {
             buffer.close();
             reader.close();
         }
+        // If there is an IOException then report the failure to the user.
         catch (IOException e)
         {
             e.printStackTrace();
+            return false;
         }
         
-        //Create myMap and populate it with
-        //the MapElements defined by str.
+        //Create myMap and populate it with MapElements
+        //determined by the contents of str.
         myMap = new MapElement[length][breadth];
         int y=0,x=0;
         for(int i = 0;i<str.length();i++)
@@ -234,6 +246,11 @@ class Map {
                 myMap[y][j] = new Floor();
             }
         }
+        
+        //Reset map completion status
+        complete = false;
+        
+        return true;
     }
     
     public void resetNoMoves()

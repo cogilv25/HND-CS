@@ -21,6 +21,12 @@ class MapElement {
     private int y;
     
     //Functions
+    
+    public MapElement() 
+    {
+        underneath = this;
+    }
+    
     public boolean getCanBePushed()
     {
         return canBePushed;
