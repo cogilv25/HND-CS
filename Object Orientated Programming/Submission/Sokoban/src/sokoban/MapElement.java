@@ -2,25 +2,23 @@
 * file: MapElement.java
 * Author: Calum Lindsay
 * Created: 06-10/2021
-* Last Modified: 06-10/2021
+* Last Modified: 29-04/2022
 * Notes: This is a simple class to store information 
-* about a single tile on the map.
+* about a single tile in a map.
 ========================================================*/
 
 package sokoban;
 
 class MapElement {
-    // Variables
     private boolean canBePushed;
     private String imgFileName;
-    private boolean isDestination;
+    protected boolean isDestination;
     private boolean obs;
     private String symbol;
     private MapElement underneath;
     private int x;
     private int y;
     
-    //Functions
     
     public MapElement() 
     {
@@ -97,12 +95,12 @@ class MapElement {
         underneath = u;
     }
     
-    public void setX(int val)
+    public void setX(int value)
     {
-        x = val;
+        x = value;
     }
-    public void setY(int val)
+    public void setY(int value)
     {
-        y = val;
+        y = value;
     }
 }

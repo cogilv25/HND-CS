@@ -2,7 +2,7 @@
 * file: Map.java
 * Author: Calum Lindsay
 * Created: 06/10/2021
-* Last Modified: 23/04/2022
+* Last Modified: 29/04/2022
 * Notes: This class loads and stores the map as an
 * array of Map Elements and allows the map to be
 * viewed and queried about it's current state.
@@ -24,6 +24,7 @@ class Map {
     
     public Map()
     {
+        //Initialise the map
         length = 0;
         breadth = 0;
         playerLocation = new Coord();
@@ -37,32 +38,16 @@ class Map {
         if(complete)
             return true;
         
-        
         //If we find a Crate with anything other than a
         //diamond under it then the game isn't over.
-        boolean result = true;
+        boolean result = true;    
         for(int y=0;y<length;y++)
-        {
             for(int x=0;x<breadth;x++)
-            {
-                if(myMap[y][x].getSymbol().compareTo("C")==0)
-                {
-                    if(!myMap[y][x].getIsDestination())
-                    {
-                        if(myMap[y][x].getUnderneath().getSymbol().compareTo("D")==0)
-                        {
-                            //We will also lock any crate in place that is on
-                            //a diamond and change it's image.
-                            myMap[y][x].setIsDestination(true);
-                            myMap[y][x].setCanBePushed(false);
-                            myMap[y][x].setImgFilename("assets/MayBADes.png");
-                            continue;
-                        }
+                if(myMap[y][x].getSymbol().compareTo("C")==0 && !myMap[y][x].getIsDestination())
+                    if(myMap[y][x].getUnderneath().getSymbol().compareTo("D")==0)
+                        myMap[y][x].setIsDestination(true);
+                    else
                         result = false;
-                    }
-                }
-            }
-        }
         
         //Set complete and return the result
         return (complete = result);
@@ -70,6 +55,8 @@ class Map {
     
     public Coord findPlayer()
     {
+        //Iterate over the map to attempt to find the player
+        // and return as soon as the player is found
         for(int y = 0;y<length;y++)
             for(int x = 0;x<breadth;x++)
                 if(myMap[y][x].getSymbol().compareTo("S")==0)
@@ -78,6 +65,8 @@ class Map {
                     playerLocation.setYCoord(y);
                     return playerLocation;
                 }
+        
+        
         //If we can't find the player return null
         return null;
     }
@@ -89,23 +78,20 @@ class Map {
         if(newX < 0 || newY < 0 || newX >= breadth || newY >= length)
             return;
         
-        //Put element to move in swap
+        //Move the element from (currX, currY) to (newX, newY),
+        // the element that was at (newX, newY) to underneath
+        // the moving element and, the element that was underneath
+        // the moving element to (currX, currY)
         MapElement swap = myMap[currY][currX];
-        //Replace element to move with what
-        //was underneath it 
         myMap[currY][currX] = swap.getUnderneath();
-        //Put the tile at the new location underneath
-        //the tile we are moving
         swap.setUnderneath(myMap[newY][newX]);
-        //Finally move the tile in limbo to it's
-        //new position
         myMap[newY][newX] = swap;
     }
     
     public void movePlayer(int dir)
     {
-        int x = playerLocation.getXCoord();
-        int y = playerLocation.getYCoord();
+        int plyrX = playerLocation.getXCoord();
+        int plyrY = playerLocation.getYCoord();
         
         
        //Convert a NESW direction to a 2D unit vector
@@ -115,31 +101,115 @@ class Map {
         
         //Prevent the player moving out of the playable
         // area if there are no walls to stop them
-        if(x+dirX < 0 || y+dirY < 0 || x+dirX >= breadth || y+dirY >= length)
+        if(plyrX+dirX < 0 || plyrY+dirY < 0 || 
+            plyrX+dirX >= breadth || plyrY+dirY >= length)
             return;
         
         //Check if there is anything in front of the player
-        if(myMap[y+dirY][x+dirX].getObs())
+        if(myMap[plyrY+dirY][plyrX+dirX].getObs())
         {
             //If the obstacle can't be pushed do nothing
-            if(!myMap[y+dirY][x+dirX].getCanBePushed())
+            if(!myMap[plyrY+dirY][plyrX+dirX].getCanBePushed())
                 return;
             //If there is something blocking the pushable
-            //object again do nothing
-            if(myMap[y+2*dirY][x+2*dirX].getObs())
+            //object, again, do nothing
+            if(myMap[plyrY+2*dirY][plyrX+2*dirX].getObs())
                 return;
             //Otherwise move the obstacle one tile
             //in the direction the player is moving
-            move(x+dirX,y+dirY,x+2*dirX,y+2*dirY);
+            move(plyrX+dirX,plyrY+dirY,plyrX+2*dirX,plyrY+2*dirY);
         }
         
         //Move the player one tile
-        move(x,y,x+dirX,y+dirY);
-        playerLocation.setXCoord(x+dirX);
-        playerLocation.setYCoord(y+dirY);
+        move(plyrX,plyrY,plyrX+dirX,plyrY+dirY);
+        playerLocation.setXCoord(plyrX+dirX);
+        playerLocation.setYCoord(plyrY+dirY);
         
         //Increment number of moves 
         noOfMoves++;
+    }
+    
+    public boolean loadMap(String mapName)
+    {
+        //Open the file containing the map
+        InputStream stream = getClass().getResourceAsStream(mapName);
+        
+        //Most likely the file path is wrong if stream is null 
+        if(stream == null)
+            return false;
+        
+        //Determine the length and breadth of the map
+        //and load it's contents into str.
+        length = 0; //y
+        breadth = 0; //x
+        String str = "";
+        InputStreamReader reader = new InputStreamReader(stream);
+        BufferedReader buffer = new BufferedReader(reader);
+        try
+        {
+            int c,x = 0;
+            while((c = buffer.read()) != -1)
+            {
+                if(c!='\n')
+                    ++x;
+                else
+                {
+                    ++length;
+                    breadth = Math.max(breadth,x-1);
+                    x = 0;
+                }
+                str += (char)c;
+            }
+            ++length;
+            breadth = Math.max(breadth,x);
+            
+            stream.close();
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+        
+        //Create myMap and populate it with MapElements
+        //determined by the contents of str.
+        myMap = new MapElement[length][breadth];
+        int y=0,x=0;
+        for(int i = 0;i<str.length();i++)
+        {
+            switch((char)str.charAt(i))
+            {
+                case '\n' -> {
+                    //Fill in blank areas with Floor tiles and
+                    // move to the next row in the map
+                    if(x!=breadth)
+                        for(int j = x;j<breadth;j++)
+                            myMap[y][j] = new Floor();
+                    x=0;
+                    y++;
+                }
+                //The nested switch is just for readability as
+                // ++x is required for each case
+                case ' ','W','F','C','D','S' -> {
+                    switch((char)str.charAt(i))
+                    {
+                        case ' ' -> myMap[y][x] = new Floor();   
+                        case 'W' -> myMap[y][x] = new Wall();
+                        case 'F' -> myMap[y][x] = new Floor();
+                        case 'C' -> myMap[y][x] = new Crate();
+                        case 'D' -> myMap[y][x] = new Diamond();
+                        case 'S' -> myMap[y][x] = new Player();
+                    }
+                    ++x;
+                }
+            }
+        }
+        //Fill any empty space with Floor tiles.
+        if(x!=breadth)
+            for(int j = x;j<breadth;j++)
+                myMap[y][j] = new Floor();
+        
+        complete = false;
+        return true;
     }
     
     public boolean isObstacleAhead(int x, int y)
@@ -152,124 +222,19 @@ class Map {
         return myMap[y][x].getCanBePushed();
     }
     
-    public boolean loadMap(String mapName)
-    {
-        //Open the file containing the map
-        InputStream stream = getClass().getResourceAsStream(mapName);
-        
-        //Most likely the file path is wrong if stream is null 
-        if(stream == null)
-            return false;
-        
-        InputStreamReader reader = new InputStreamReader(stream);
-        BufferedReader buffer = new BufferedReader(reader);
-        
-        //Determine the length and breadth of the map
-        //and load it's contents into the String str.
-        length = 0; //y
-        breadth = 0; //x
-        String str = "";
-        try
-        {
-            int c,x = 0;
-            while((c = buffer.read()) != -1)
-            {
-                if(c=='\n')
-                {
-                    ++length;
-                    breadth = Math.max(breadth,x-1);
-                    x = 0;
-                }
-                else
-                {
-                    ++x;
-                }
-                str += (char)c;
-            }
-            ++length;
-            breadth = Math.max(breadth,x);
-            buffer.close();
-            reader.close();
-        }
-        // If there is an IOException then report the failure to the user.
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-        
-        //Create myMap and populate it with MapElements
-        //determined by the contents of str.
-        myMap = new MapElement[length][breadth];
-        int y=0,x=0;
-        for(int i = 0;i<str.length();i++)
-        {
-            switch((char)str.charAt(i))
-            {
-                case '\n':
-                    //Fill in blank areas with Floor tiles
-                    if(x!=breadth)
-                    {
-                        for(int j = x;j<breadth;j++)
-                        {
-                            myMap[y][j] = new Floor();
-                        }
-                    }
-                    x=0;
-                    y++;
-                break;
-                case ' ': myMap[y][x] = new Floor();
-                ++x;
-                break;
-                case 'W': myMap[y][x] = new Wall();
-                ++x;
-                break;
-                case 'F': myMap[y][x] = new Floor();
-                ++x;
-                break;
-                case 'C': myMap[y][x] = new Crate();
-                ++x;
-                break;
-                case 'D': myMap[y][x] = new Diamond();
-                ++x;
-                break;
-                case 'S': myMap[y][x] = new Player();
-                ++x;
-                break;
-            }
-        }
-        //Fill any empty space with Floor tiles.
-        if(x!=breadth)
-        {
-            for(int j = x;j<breadth;j++)
-            {
-                myMap[y][j] = new Floor();
-            }
-        }
-        
-        //Reset map completion status
-        complete = false;
-        
-        return true;
-    }
-    
     public void resetNoMoves()
     {
         noOfMoves = 0;
     }
     
-    public void setBreadth(int b)
-    {
-        breadth = b;
-    }
-    
-    public void setLength(int l)
-    {
-        length = l;
-    }
-    
     public void setLocation(int x, int y)
-    {
+    {   
+        //Prevent the player from being moved outside
+        // of the playable area 
+        if(x < 0 || y < 0 || x >= breadth || y >= length)
+            return;
+        
+        move(playerLocation.getXCoord(),playerLocation.getYCoord(),x,y);
         playerLocation.setXCoord(x);
         playerLocation.setYCoord(y);
     }

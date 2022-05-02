@@ -9,10 +9,6 @@
 
 package sokoban;
 
-/**
- *
- * @author Calum
- */
 public class Diamond extends MapElement {
 
     public Diamond() 

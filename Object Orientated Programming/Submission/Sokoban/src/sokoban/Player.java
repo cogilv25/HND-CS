@@ -13,11 +13,11 @@ public class Player extends MapElement {
 
     public Player() 
     {
-        this.setObs(false);
-        this.setSymbol("S");
-        this.setCanBePushed(false);
-        this.setImgFilename("assets/MayBAChar.png");
-        this.setUnderneath(new Floor());
+        setObs(false);
+        setSymbol("S");
+        setCanBePushed(false);
+        setImgFilename("assets/MayBAChar.png");
+        setUnderneath(new Floor());
     }
     
 }

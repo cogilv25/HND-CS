@@ -6,6 +6,7 @@
 * Notes: This is a simple class that represents
 * a Wall on the map in the game. 
 ========================================================*/
+
 package sokoban;
 
 public class Wall extends MapElement {

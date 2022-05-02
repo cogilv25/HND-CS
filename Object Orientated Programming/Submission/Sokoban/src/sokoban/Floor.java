@@ -6,12 +6,9 @@
 * Notes: This is a simple class that represents
 * a Floor tile on the map in the game. 
 ========================================================*/
+
 package sokoban;
 
-/**
- *
- * @author Calum
- */
 public class Floor extends MapElement {
 
     public Floor() 
