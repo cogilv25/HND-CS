@@ -1,6 +1,9 @@
 <?php
-	$componentName = "header.php";
-	require_once "component.php";
+	if(basename($_SERVER['PHP_SELF']) == "header.php")
+	{
+		header('Location:../404.php');
+		die();
+	}
 
 	
 	$navLinksToUse = $_SESSION["logged_in"] ? "basket" : "register";

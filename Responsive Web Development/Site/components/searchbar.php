@@ -1,6 +1,9 @@
 <?php
-	$componentName = "searchbar.php";
-	require_once "component.php";
+	if(basename($_SERVER['PHP_SELF']) == "header.php")
+	{
+		header('Location:../404.php');
+		die();
+	}
 ?>
 
 
