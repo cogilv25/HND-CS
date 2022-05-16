@@ -17,7 +17,7 @@
   	{
   		$wasaerror = ""
   		$username = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
-  		$password = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
+  		$password = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
 		$db = new mysqli("comp-server.uhi.ac.uk","SH21010093","21010093","SH21010093");
 		if ($db->connect_error)
 		{
@@ -51,7 +51,7 @@
 		{
 			$wasaerror = "Username already exists"
 		}
-  	}
+  	} 
   	?>
 
   </head>
