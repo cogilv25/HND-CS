@@ -15,41 +15,46 @@
   	//Functionality
   	if (isset($_POST['username']))
   	{
-  		$wasaerror = ""
+  		$error = "";
   		$username = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
-  		$password = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
+  		$password = password_hash(filter_var($_POST['password'], FILTER_SANITIZE_STRING),PASSWORD_DEFAULT);
 		$db = new mysqli("comp-server.uhi.ac.uk","SH21010093","21010093","SH21010093");
 		if ($db->connect_error)
 		{
-  			die('Unable to connect to database ['.$db->connect_error.']');
+  			die('Unable to connect to database [' . $db->connect_error . ']');
 		}
 
 
 		// Prepare queries
-		$query1 = $db -> prepare("select count(*) from `User` where `Username` = ?");
-		$query1 -> bind_param("s",$username);
-		$query2 = $db -> prepare("insert into `User` (`Username`,`Password`) values (?,?)");
-		$query2 -> bind_param("ss",$username,$password);
+		$query1 = $db -> prepare("select count(*) from User where Username = ?");
+    $query1 -> bind_param("s",$username);
+    $query2 = $db -> prepare("insert into User (Username, Password) values (?,?)");
+    $query2 -> bind_param("ss",$username,$password);
 
-		// Execute queries
+		// Check if the user already exists
 		$query1 -> execute();
 		$query1 -> bind_result($exists);
 		$query1 -> fetch();
+		$query1 -> fetch();
+
 		if($exists == 0)
-		{
+    {
+      // Create the new user
 			$query2 -> execute();
-			// Check record exists
 			$query1 -> execute();
 			$query1 -> bind_result($exists);
 			$query1 -> fetch();
+      $query1 -> fetch();
+
+			// Check that the user was created successfully
 			if($exists == 0)
 			{
-				$wasaerror = "Record was inserted but doesn't exist";
+				$error = "Unexpected error - user not created";
 			}
 		}
 		else
 		{
-			$wasaerror = "Username already exists"
+			$error = "Username already exists";
 		}
   	} 
   	?>
@@ -109,11 +114,24 @@
     </div>
     <div class="col-md-3"></div>
   </div>
+
+<?php
+if(isset($_POST['username']))
+{
+  ?>
+  <div class="row justify-content-center">
+    <div class="col-6"><?php echo(($error === "") ? $username . " was successfully registered!" : $error);?></div>
+  </div>
+  <?php
+}
+?>
+
 </div>
 
 
 <!-- Form validation -->
 <script>
+  // https://mdbootstrap.com/snippets/jquery/tomekmakowski/631899#js-tab-view
   (function () {
   'use strict'
 
@@ -125,8 +143,8 @@
     .forEach(function (form) {
     form.addEventListener('submit', function (event) {
       if (!form.checkValidity()) {
-      event.preventDefault()
-      event.stopPropagation()
+        event.preventDefault()
+        event.stopPropagation()
       }
 
       form.classList.add('was-validated')

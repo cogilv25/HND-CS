@@ -5,8 +5,9 @@
 		die();
 	}
 
-	
-	$navLinksToUse = $_SESSION["logged_in"] ? "basket" : "register";
+	$loggedIn = $_SESSION["logged_in"];
+	$navLinksToUse = $loggedIn ? ["profile","basket"] : ["register","login"];
+	$navLinksToUse = $loggedIn ? ["profile","basket"] : ["register","login"];
 
 	$icons = array(
 		"home" => array("assets/home.png","assets/homeHover.png"),
@@ -84,7 +85,7 @@
 		</div>
 
 		<div class="col-2">
-			<a class="nav-link text-center fs-3 <?php echo $classes['profile'];?>" href="profile.php">Profile</a>
+			<a class="nav-link text-center fs-3 <?php echo $classes['profile'];?>" href="register.php">Register</a>
 		</div>
 
 		<div class="col-2">
