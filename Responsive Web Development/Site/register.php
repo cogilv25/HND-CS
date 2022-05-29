@@ -17,6 +17,7 @@
   	{
   		$error = "";
   		$username = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
+      $address = filter_var($_POST['address'], FILTER_SANITIZE_STRING);
   		$password = password_hash(filter_var($_POST['password'], FILTER_SANITIZE_STRING),PASSWORD_DEFAULT);
 		$db = new mysqli("comp-server.uhi.ac.uk","SH21010093","21010093","SH21010093");
 		if ($db->connect_error)
@@ -28,8 +29,8 @@
 		// Prepare queries
 		$query1 = $db -> prepare("select count(*) from User where Username = ?");
     $query1 -> bind_param("s",$username);
-    $query2 = $db -> prepare("insert into User (Username, Password) values (?,?)");
-    $query2 -> bind_param("ss",$username,$password);
+    $query2 = $db -> prepare("insert into User (Username, Password, Address) values (?,?,?)");
+    $query2 -> bind_param("sss",$username,$password,$address);
 
 		// Check if the user already exists
 		$query1 -> execute();
@@ -42,9 +43,9 @@
       // Create the new user
 			$query2 -> execute();
 			$query1 -> execute();
+      
 			$query1 -> bind_result($exists);
 			$query1 -> fetch();
-      $query1 -> fetch();
 
 			// Check that the user was created successfully
 			if($exists == 0)
@@ -56,6 +57,9 @@
 		{
 			$error = "Username already exists";
 		}
+    $query1 -> close();
+    $query2 -> close();
+    $db -> close();
   	} 
   	?>
 
@@ -95,6 +99,17 @@
           </div>
         </div>
 
+        <div class="col-md-12">
+          <label for="validationCustom03" class="form-label">Address</label>
+          <textarea rows="3" class="form-control" name="address" id="validationCustom03" required></textarea>
+          <div class="valid-feedback">
+            Looks good!
+          </div>
+          <div class="invalid-feedback">
+            Please enter a valid address.
+          </div>
+        </div>
+
         <div class="col-6">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="invalidCheck" required>
@@ -108,7 +123,7 @@
         </div>
 
         <div class="col-6">
-          <button class="btn btn-primary float-md-end" type="submit">Register User</button>
+          <button class="btn btn-primary float-md-end" id="submitButton" type="submit">Register User</button>
         </div>
       </form>
     </div>
@@ -131,6 +146,18 @@ if(isset($_POST['username']))
 
 <!-- Form validation -->
 <script>
+
+
+  function capitaliseValue()
+  {
+    this.value = this.value.toUpperCase();
+  }
+
+
+  //Automatically capitalise the address textbox when the user is typing
+  let addressInput = document.getElementById('validationCustom03');
+  addressInput.onkeyup = capitaliseValue;
+
   // https://mdbootstrap.com/snippets/jquery/tomekmakowski/631899#js-tab-view
   (function () {
   'use strict'
@@ -151,6 +178,7 @@ if(isset($_POST['username']))
     }, false)
     })
   })()
+
 </script>
 <!-- Include Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
