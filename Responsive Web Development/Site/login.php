@@ -26,11 +26,11 @@
 
 
   		// Prepare queries
-  		$query = $db -> prepare("select Password from User where Username = ?");
+  		$query = $db -> prepare("select Password,Blocked from User where Username = ?");
       $query -> bind_param("s",$username);
 
   		// Check if the user already exists
-      $query -> bind_result($realPass);
+      $query -> bind_result($realPass,$blocked);
   		$query -> execute();
   		$query -> fetch();
       $query -> close();
@@ -38,10 +38,24 @@
 
   		if(password_verify($password, $realPass))
       {
-        session_start();
-        $_SESSION['user'] = $username;
-        $error = "Logged in!";
-        header("Location: user.php");
+        if($blocked)
+        {
+          $error = "You have been blocked by the admin.";
+        }
+        else
+        {
+          session_start();
+          $_SESSION['user'] = $username;
+          $error = "Logged in!";
+          header("Location: user.php");
+
+          // Set the username cookie so that the user's browser will remember it
+          if(navigator.cookieEnabled == true)
+          {
+            setcookie("username",$username,time()+86400*30);
+          }
+        }
+
   		}
   		else
   		{
@@ -66,7 +80,7 @@
       <form class="row g-3 needs-validation" novalidate action="<?php echo basename($_SERVER['PHP_SELF']);?>" method="post">
         <div class="col-md-6">
           <label for="validationCustom01" class="form-label">Username</label>
-          <input type="text" class="form-control" name="username" id="validationCustom01" required>
+          <input type="text" class="form-control" name="username" value="<?php echo(isset($_COOKIE["username"]) ? $_COOKIE["username"] : ""); ?>" id="validationCustom01" required>
           <div class="invalid-feedback">
             Please enter your username.
           </div>
