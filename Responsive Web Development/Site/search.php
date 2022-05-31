@@ -26,18 +26,22 @@
           }
 
 
-          // Prepare queries
-          $query = $db -> prepare("select Title,Price,Image from Album where ? like %?%");
-          $query -> bind_param("ss",$criteria, $phrase);
+          // Prepare query
+          echo($criteria);
+          $query = $db -> prepare("select AlbumID,Title,Price,Image from Album where " . $criteria . " like '%" . $phrase . "%'");
+          $query -> bind_param("s",$phrase);
 
-          // Check if the user already exists
-          $query -> bind_result($title,$price,$imageLink);
+          //$query = $db -> prepare("select AlbumID,Title,Price,Image from Album");
+
+          // execute
+          $query -> bind_result($albumID,$title,$price,$imageLink);
           $query -> execute();
           $query -> fetch();
 
 
           $query -> close();
           $db -> close();
+        }
         else
         {
           $error = "Search type not supported!";
@@ -49,10 +53,24 @@
 
   <body style="background-color: #FFFFFF;">
     <?php
-      $testthing = 'components/header.php';
-      require $testthing;
+    
+      require 'components/header.php';
       require 'components/searchbar.php';
+
     ?>
+    <div class="container-fluid">
+	    <div class="row justify-content-center">
+        <div class="col-12 col-md-6">
+          <?php
+            if(isset($_GET["searchString"]))
+            {
+              require 'components/vinylResultGrid.php';
+            }
+          ?>
+        </div>
+      </div>
+    </div>
+
 
   </body>
 </html>
