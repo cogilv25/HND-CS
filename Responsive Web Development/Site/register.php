@@ -12,54 +12,67 @@
     <title>MusicOnline.com - Register</title>
 
     <?php
-  	//Functionality
+
+    //Connect to the database server and handle any errors if they occur
+    $db = new mysqli("comp-server.uhi.ac.uk","SH21010093","21010093","SH21010093");
+  	if ($db->connect_error)
+    {
+        die('Unable to connect to database [' . $db->connect_error . ']');
+    }
+
+    // If a username has been posted to the page then,
+    // attempt to create a new user in the database
   	if (isset($_POST['username']))
   	{
-  		$error = "";
+      //Sanitize the user input posted to the page
   		$username = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
       $address = filter_var($_POST['address'], FILTER_SANITIZE_STRING);
   		$password = password_hash(filter_var($_POST['password'], FILTER_SANITIZE_STRING),PASSWORD_DEFAULT);
-		$db = new mysqli("comp-server.uhi.ac.uk","SH21010093","21010093","SH21010093");
-		if ($db->connect_error)
-		{
-  			die('Unable to connect to database [' . $db->connect_error . ']');
-		}
+		
 
+  		// Prepare 2 queries:
+      //    query1 - Checks if there is a user with the username specified
+      //    query2 - Inserts a new user into the database
+  		$query1 = $db -> prepare("select count(*) from User where Username = ?");
+      $query1 -> bind_param("s",$username);
+      $query2 = $db -> prepare("insert into User (Username, Password, Address) values (?,?,?)");
+      $query2 -> bind_param("sss",$username,$password,$address);
 
-		// Prepare queries
-		$query1 = $db -> prepare("select count(*) from User where Username = ?");
-    $query1 -> bind_param("s",$username);
-    $query2 = $db -> prepare("insert into User (Username, Password, Address) values (?,?,?)");
-    $query2 -> bind_param("sss",$username,$password,$address);
+  		// Check if the user already exists by executing query1
+  		$query1 -> execute();
+  		$query1 -> bind_result($exists);
+  		$query1 -> fetch();
+  		$query1 -> fetch(); // Extra fetch required to solve a bug
 
-		// Check if the user already exists
-		$query1 -> execute();
-		$query1 -> bind_result($exists);
-		$query1 -> fetch();
-		$query1 -> fetch();
+  		if($exists == 0)
+      {
+        // Create the new user by executing query2
+  			$query2 -> execute();
+  			$query1 -> execute();
+        
+        // Check that the user was created successfully,
+        // if not display an error message
+  			$query1 -> bind_result($exists);
+  			$query1 -> fetch();
+  			if($exists == 0)
+  			{
+  				$error = "Unexpected error - user not created";
+  			}
+        else
+        {
+          // Finally log the user in and redirect them to their profile
+          session_start();
+          $_SESSION['user'] = $username;
+          header("Location: profile.php");
+        }
+  		}
+  		else
+  		{
+  			$error = "Username already exists";
+  		}
 
-		if($exists == 0)
-    {
-      // Create the new user
-			$query2 -> execute();
-			$query1 -> execute();
-      
-			$query1 -> bind_result($exists);
-			$query1 -> fetch();
-
-			// Check that the user was created successfully
-			if($exists == 0)
-			{
-				$error = "Unexpected error - user not created";
-			}
-		}
-		else
-		{
-			$error = "Username already exists";
-		}
-    $query1 -> close();
-    $query2 -> close();
-    $db -> close();
+      $query1 -> close();
+      $query2 -> close();
   	} 
   	?>
 
@@ -70,12 +83,16 @@
 
   <?php
     require 'components/header.php';
+    require 'components/searchbar.php';
   ?>
 
+
+  <!-- Registration Form -->
   <div class="container-fluid">
   <div class="row justify-content-center">
     <div class="col-md-3"></div>
     <div class="col-12 col-md-6">
+      <h3>Registration Form</h3>
       <form class="row g-3 needs-validation" novalidate action="<?php echo basename($_SERVER['PHP_SELF']);?>" method="post">
         <div class="col-md-6">
           <label for="validationCustom01" class="form-label">Username</label>
@@ -131,11 +148,13 @@
   </div>
 
 <?php
+
+// Display any errors encountered
 if(isset($_POST['username']))
 {
   ?>
   <div class="row justify-content-center">
-    <div class="col-6"><?php echo(($error === "") ? $username . " was successfully registered!" : $error);?></div>
+    <div class="col-6"><?php echo($error);?></div>
   </div>
   <?php
 }
@@ -143,8 +162,6 @@ if(isset($_POST['username']))
 
 </div>
 
-
-<!-- Form validation -->
 <script>
 
 
@@ -154,15 +171,15 @@ if(isset($_POST['username']))
   }
 
 
-  //Automatically capitalise the address textbox when the user is typing
+  // Automatically capitalise the address textbox when the user is typing
   let addressInput = document.getElementById('validationCustom03');
   addressInput.onkeyup = capitaliseValue;
 
-  // https://mdbootstrap.com/snippets/jquery/tomekmakowski/631899#js-tab-view
+  // Bootstrap Form Validation
   (function () {
   'use strict'
 
-  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  // Fetch all the forms we want to apply Bootstrap validation styles to
   var forms = document.querySelectorAll('.needs-validation')
 
   // Loop over them and prevent submission
@@ -180,6 +197,10 @@ if(isset($_POST['username']))
   })()
 
 </script>
+
+
+    <?php $db -> close(); ?>
+
 <!-- Include Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 

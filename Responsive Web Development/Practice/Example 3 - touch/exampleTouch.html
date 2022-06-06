@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- google font being applied here -->
+<link href="https://fonts.googleapis.com/css2?family=Advent+Pro&display=swap" rel="stylesheet">
+
+<style>
+    html{
+    font-size: 18px;
+    }
+
+    p.normal{
+        font-family: 'Advent Pro', sans-serif;
+        font-size: 1.2em;
+    }
+
+    p.medium{
+        font-family: 'Advent Pro', sans-serif;
+        font-size: 1.5em;
+    }
+
+    input{
+        font-family: 'Advent Pro', sans-serif;
+        font-size: 1.3em;
+    }
+
+    h2 {
+        font-family: 'Advent Pro', sans-serif;
+        font-size: 2.0em;
+    }
+
+
+
+</style>
+
+</head>    
+<body>
+
+<!-- Example 1 -->
+<h2> Example - using touchmove event</h2>
+<p class="normal">This example demonstrates how to use the touchmove javascript event.</p>
+
+<p class="normal">Press F12 in google Chrome to test, or use a Mobile Device</p>
+
+
+    <p class="medium">Beer Choice 1<img src="beer1.png" id="beer1" alt="Beer 1"></p>
+    <p class="medium">Beer Choice 2<img src="beer2.png" id="beer2" alt="Beer 1"></p>
+
+<br><br>
+
+<p class="medium" id="result"></p>
+
+<script>
+document.getElementById("beer1").ontouchstart = myFunction1;
+document.getElementById("beer2").ontouchstart = myFunction2;
+
+function myFunction1() {
+  document.getElementById("result").innerHTML = "You have chosen Beer 1";
+}
+
+function myFunction2() {
+  document.getElementById("result").innerHTML = "You have chosen Beer 2";
+}
+
+
+</script>
+
+</body>
+</html>
